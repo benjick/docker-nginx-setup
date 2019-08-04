@@ -1,0 +1,34 @@
+#watchtower:
+#  image: centurylink/watchtower
+#  volumes:
+#   - /var/run/docker.sock:/var/run/docker.sock
+#  command: --cleanup
+
+version: '2'
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy:alpine
+    container_name: nginx-proxy
+    restart: always
+    network_mode: host
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./conf/vhost.d:/etc/nginx/vhost.d"
+      - "./conf/html:/usr/share/nginx/html"
+      - "./conf/certs:/etc/nginx/certs:ro"
+      - "/var/run/docker.sock:/tmp/docker.sock:ro"
+      - "./custom_proxy_settings.conf:/etc/nginx/conf.d/custom_proxy_settings.conf"
+
+  letsencrypt-nginx-proxy-companion:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: letsencrypt-nginx-proxy-companion
+    restart: always
+    network_mode: host
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - "./conf/certs:/etc/nginx/certs:rw"
+      - "/var/run/docker.sock:/var/run/docker.sock:rw"
+

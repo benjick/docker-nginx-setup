@@ -1,0 +1,27 @@
+proxy:
+  image: dmp1ce/nginx-proxy-letsencrypt
+  ports:
+   - "80:80"
+   - "443:443"
+  volumes:
+   - /var/run/docker.sock:/tmp/docker.sock:ro
+
+watchtower:
+  image: centurylink/watchtower
+  volumes:
+   - /var/run/docker.sock:/var/run/docker.sock
+  command: --cleanup
+
+cadvisor:
+  image: google/cadvisor
+  volumes:
+   - /:/rootfs:ro
+   - /var/run:/var/run:rw
+   - /sys:/sys:ro
+   - /var/lib/docker/:/var/lib/docker:ro
+  environment:
+   - VIRTUAL_HOST=status.serv.cat
+   - LETSENCRYPT_HOST=status.serv.cat
+   - LETSENCRYPT_EMAIL=benjick@dumfan.net
+
+
